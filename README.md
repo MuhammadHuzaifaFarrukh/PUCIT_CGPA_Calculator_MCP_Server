@@ -36,10 +36,9 @@ An interactive command-line academic advising assistant for **PUCIT BS(CS)** stu
 │   ├── main.py            # CLI entry point, streaming, SQLite checkpointer, commands, recovery
 │   ├── llm.py             # LLM model configuration
 │   └── requirements.txt   # Agent Python dependencies
-└── server/                # MCP server codebase (hosted separately on GitHub / cloud host)
-    ├── server.py          # FastMCP server exposing academic advising tools
-    ├── tools.py           # GPA, CGPA, credit-hour, target-GPA, and report tools
-    └── requirements.txt   # Server Python dependencies
+├── server.py          # FastMCP server exposing academic advising tools (MCP server codebase (hosted separately on GitHub / cloud host)
+├── tools.py           # GPA, CGPA, credit-hour, target-GPA, and report tools
+└── requirements.txt   # Server Python dependencies
 ```
 
 ---
