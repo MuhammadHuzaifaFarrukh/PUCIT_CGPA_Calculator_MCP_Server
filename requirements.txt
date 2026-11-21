@@ -1,1 +1,6 @@
+python-dotenv
 fastmcp>=4.0.0
+langchain
+langchain-core
+langchain-groq
+langgraph-checkpoint-sqlite
