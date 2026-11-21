@@ -149,8 +149,8 @@ Use this if you do **not** have the server files and do not want to run the serv
 Clone the repository and use only the `agent/` folder:
 
 ```bash
-git clone https://github.com/<your-username>/<your-repo>.git
-cd <your-repo>/agent
+git clone https://github.com/MuhammadHuzaifaFarrukh/PUCIT_CGPA_Calculator_MCP_Server.git
+cd PUCIT_CGPA_Calculator_MCP_Server
 ```
 
 Or download just the `agent/` folder and open a terminal inside it.
