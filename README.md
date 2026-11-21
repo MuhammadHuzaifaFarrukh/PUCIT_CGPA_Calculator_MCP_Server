@@ -2,6 +2,12 @@
 
 An interactive command-line academic advising assistant for **PUCIT BS(CS)** students, built with LangChain/LangGraph and connected to a FastMCP tool server. It helps with degree and course lookups, GPA/CGPA and credit-hour calculations, multi-semester GPA target planning, saving confirmed summary reports, and keeping persistent per-student conversation threads.
 
+**Hosted MCP server:**
+
+```text
+https://pucit-cgpa-advisor.fastmcp.app/mcp
+```
+
 ---
 
 ## Features
@@ -35,25 +41,63 @@ An interactive command-line academic advising assistant for **PUCIT BS(CS)** stu
 ├── agent/
 │   ├── main.py            # CLI entry point, streaming, SQLite checkpointer, commands, recovery
 │   ├── llm.py             # LLM model configuration
-│   └── requirements.txt   # Agent Python dependencies
-├── server.py          # FastMCP server exposing academic advising tools (MCP server codebase (hosted separately on GitHub / cloud host)
-├── tools.py           # GPA, CGPA, credit-hour, target-GPA, and report tools
-└── requirements.txt   # Server Python dependencies
+│   ├── requirements.txt   # Agent Python dependencies
+│   └── .env.example       # Example environment variables (add your own keys)
+├── server.py              # FastMCP server exposing academic advising tools
+├── tools.py               # GPA, CGPA, credit-hour, target-GPA, and report tools
+└── requirements.txt       # Server Python dependencies
 ```
 
 ---
 
-## Getting Started
+## How It Works
 
-### Prerequisites
+The project has two parts:
+
+1. **MCP server (`server.py` + `tools.py`):** exposes the GPA, CGPA, credit-hour, target-GPA, and report tools. It is hosted at the URL above, and you can also run it locally.
+2. **Agent (`agent/`):** the CLI app that runs on your own machine. It connects to an MCP server over HTTP using `MCP_URL`.
+
+Your CLI and SQLite memory (`cgpa_memory.db`) always run on your computer. Only the tool execution happens on the MCP server, which is local or hosted depending on the method you choose.
+
+Choose one of the two methods below.
+
+| | Method A: Full project (local server) | Method B: Agent only (hosted server) |
+|---|---|---|
+| Files needed | Whole repo | `agent/` folder only |
+| Server runs | On your machine | On the hosted server |
+| `MCP_URL` | `http://127.0.0.1:8000/mcp` | `https://pucit-cgpa-advisor.fastmcp.app/mcp` |
+| `FASTMCP_KEY` | Not needed for the local server | Required (bearer token) |
+| Terminals | 2 | 1 |
+
+---
+
+## Prerequisites
 
 - Python 3.10+
 - A Groq API key (`GROQ_API_KEY`)
-- An MCP server URL (`MCP_URL`), either running locally at `http://127.0.0.1:8000/mcp` or pointing to a deployed server
 
-### 1. Install dependencies
+---
 
-From the `agent/` directory, install with either:
+## Method A: Full Project Files (Local Server)
+
+Use this if you have the complete repository and want to run the MCP tools on your own machine.
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/<your-username>/<your-repo>.git
+cd <your-repo>
+```
+
+### 2. Install server dependencies
+
+From the repository root:
+
+```bash
+pip install -r requirements.txt
+```
+
+### 3. Install agent dependencies
 
 ```bash
 cd agent
@@ -65,25 +109,20 @@ or install the packages directly:
 ```bash
 pip install python-dotenv fastmcp langchain langchain-core langchain-groq langgraph-checkpoint-sqlite
 ```
-or
-```
-cd agent
-pip install -r requirements.txt
-```
 
-### 2. Configure environment variables
+### 4. Configure environment variables
 
-Create or update a `.env` file inside the `agent/` directory:
+Copy `.env.example` to `.env` inside the `agent/` directory and fill in your values:
 
 ```env
-GROQ_API_KEY=your_groq_api_key_here
-MCP_URL=https://<your-hosted-server>.fastmcp.app/mcp
+GROQ_API_KEY="YOUR_KEY"
+MCP_URL=http://127.0.0.1:8000/mcp
 FASTMCP_KEY=
 ```
 
-### 3. Start the MCP server (local only)
+### 5. Start the MCP server
 
-If you are running the server locally, open a terminal in the `server/` folder and run:
+Open a terminal in the repository root (where `server.py` is) and run:
 
 ```bash
 python server.py   # or: py server.py
@@ -91,17 +130,72 @@ python server.py   # or: py server.py
 
 Keep it running so it listens on `http://127.0.0.1:8000/mcp`.
 
-> **Note:** If `MCP_URL` already points to a live hosted server, skip this step.
+### 6. Start the agent
 
-### 4. Start the agent
-
-Open a second terminal in the `agent/` folder and run:
+Open a **second** terminal in the `agent/` folder and run:
 
 ```bash
 python main.py   # or: py main.py
 ```
 
-### 5. Chat with the advisor
+---
+
+## Method B: Agent Files Only (Hosted Server)
+
+Use this if you do **not** have the server files and do not want to run the server yourself. You only need the `agent/` folder. The tools run on the hosted server.
+
+### 1. Get the agent files
+
+Clone the repository and use only the `agent/` folder:
+
+```bash
+git clone https://github.com/<your-username>/<your-repo>.git
+cd <your-repo>/agent
+```
+
+Or download just the `agent/` folder and open a terminal inside it.
+
+### 2. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+or install the packages directly:
+
+```bash
+pip install python-dotenv fastmcp langchain langchain-core langchain-groq langgraph-checkpoint-sqlite
+```
+
+### 3. Configure environment variables
+
+Copy `.env.example` to `.env` inside the `agent/` directory and fill in your own keys:
+
+```env
+GROQ_API_KEY="YOUR_GROQ_API_KEY"
+MCP_URL=https://pucit-cgpa-advisor.fastmcp.app/mcp
+FASTMCP_KEY="YOUR_FASTMCP_BEARER_TOKEN"
+```
+
+| Variable | Description |
+|---|---|
+| `GROQ_API_KEY` | Your own Groq API key for the LLM |
+| `MCP_URL` | The hosted MCP endpoint shown above |
+| `FASTMCP_KEY` | A valid bearer token that authorizes access to the hosted server |
+
+### 4. Run the agent
+
+```bash
+python main.py   # or: py main.py
+```
+
+No local `server.py` is needed. Your CLI and `cgpa_memory.db` run on your computer, and tool calls are sent to the hosted server.
+
+---
+
+## Chatting with the Advisor
+
+Once `main.py` is running (with either method):
 
 1. When prompted, enter a student name or `thread_id`. Existing saved threads are shown on startup.
 2. Ask an advising, course, or GPA planning question and watch the streamed tool and advisor output.
@@ -113,3 +207,14 @@ python main.py   # or: py main.py
 
 - **Before each turn and on any exception**, `repair_dangling_tool_calls` inspects the active thread's state for `AIMessage` tool calls that never received a matching `ToolMessage`. It patches them with a recovery `ToolMessage` so later turns stay intact.
 - **Connection drops and streaming errors** during a turn or MCP session are caught and surfaced cleanly in the CLI. You can retry, switch threads, or check the server without the program crashing.
+
+---
+
+## Troubleshooting
+
+| Problem | Fix |
+|---|---|
+| Connection refused / timeout | Check that `MCP_URL` is correct and ends in `/mcp`. For Method A, make sure `server.py` is still running |
+| `401` / unauthorized | Check that `FASTMCP_KEY` is a valid bearer token and is set in `agent/.env` (Method B) |
+| Tools not found | Make sure `MCP_URL` points to the right server and that it is running the latest `server.py` and `tools.py` |
+| Groq errors | Verify `GROQ_API_KEY` is valid and has not hit its rate limit |
