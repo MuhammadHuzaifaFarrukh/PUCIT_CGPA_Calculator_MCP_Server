@@ -85,8 +85,8 @@ Use this if you have the complete repository and want to run the MCP tools on yo
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/<your-username>/<your-repo>.git
-cd <your-repo>
+git clone https://github.com/MuhammadHuzaifaFarrukh/PUCIT_CGPA_Calculator_MCP_Server.git
+cd PUCIT_CGPA_Calculator_MCP_Server
 ```
 
 ### 2. Install server dependencies
